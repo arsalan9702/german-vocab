@@ -1,0 +1,465 @@
+/* Step 3: navigation, screens, forms, dialogs */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:root {
+  --topbar-h: 48px;
+}
+
+/* The document never scrolls. .shell is the one scroller. */
+html,
+body {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.shell {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: min(100%, 480px);
+  min-height: 0;
+  padding-top: calc(var(--safe-top) + var(--topbar-h));
+  padding-bottom: calc(var(--safe-bottom) + 7.5rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url('./assets/grain.png');
+  background-size: 128px 128px;
+  opacity: 0.09;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Titles ---------- */
+.head {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+
+.title-script {
+  font-family: var(--font-script);
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--yellow);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.title-hero {
+  font-size: 3rem;
+  overflow-wrap: anywhere;
+}
+.title-hero.sm {
+  font-size: 2.3rem;
+}
+
+.stat-line {
+  font-weight: 600;
+}
+
+.hint {
+  text-align: center;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.muted {
+  opacity: 0.7;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 700;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.row.between {
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+/* ---------- Buttons: extras ---------- */
+.btn:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.btn.sm {
+  min-height: 40px;
+  padding: 0 1.1rem;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-sm);
+}
+.btn.sm:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* ---------- Chapter cards ---------- */
+.chapter-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.chapter-card {
+  display: grid;
+  gap: 0.75rem;
+  transition: transform 0.08s ease-out;
+}
+.chapter-card:active {
+  transform: translate(4px, 4px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.chapter-card .tag {
+  flex: none;
+  white-space: nowrap;
+}
+
+.chapter-title {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.chapter-meta {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Progress bar: the fill only scales (transform), never resizes. */
+.bar {
+  height: 14px;
+  overflow: hidden;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+.bar > i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+  transform: scaleX(var(--p, 0));
+}
+
+/* ---------- Word list ---------- */
+.chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0 1rem;
+  font-weight: 600;
+  background: var(--paper);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.word-list {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* No shadow on list rows: keeps long lists cheap to paint. */
+.word-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+  padding: 0.6rem 0.9rem;
+  background: var(--paper);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--r-sm);
+}
+.word-row:active {
+  background: var(--yellow);
+}
+
+.status-dot {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+.status-dot.known {
+  background: var(--green);
+}
+
+.word-text {
+  display: grid;
+  min-width: 0;
+}
+.word-de {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.word-en {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Empty states ---------- */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  text-align: center;
+}
+.sticker {
+  transform: rotate(-8deg);
+}
+
+/* ---------- Forms ---------- */
+.form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.area {
+  min-height: 84px;
+  line-height: 1.4;
+  resize: none;
+}
+
+.select {
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 8l8 8 8-8' fill='none' stroke='black' stroke-width='4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 14px;
+}
+
+.inline-new {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+.inline-new .field {
+  width: 100%;
+}
+
+.field-error {
+  width: fit-content;
+  padding: 0.25rem 0.6rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: var(--pink-hot);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+}
+
+.warn {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.9rem;
+  background: var(--yellow);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-sm);
+}
+
+/* ---------- Flashcard content ---------- */
+.face {
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+.face-body {
+  display: grid;
+  gap: 1rem;
+  margin-block: auto;
+}
+.face-body .tag {
+  justify-self: start;
+}
+.term {
+  overflow-wrap: anywhere;
+}
+.example {
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+/* ---------- Dialog ---------- */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.45);
+  animation: fade 0.15s ease-out backwards;
+}
+
+.dialog {
+  position: fixed;
+  z-index: 51;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  top: calc(var(--safe-top) + 12vh);
+  width: min(92vw, 420px);
+  animation: dialog-in 0.18s ease-out backwards;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+.dialog-form {
+  display: grid;
+  gap: 1rem;
+}
+.dialog-title {
+  font-size: 1.6rem;
+}
+
+/* ---------- Tab bar ---------- */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  width: min(100%, 480px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: var(--lav-2);
+  border-top: var(--bw) solid var(--ink);
+  border-left: var(--bw) solid var(--ink);
+  border-right: var(--bw) solid var(--ink);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.tab-ico {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 34px;
+  border: 2.5px solid transparent;
+  border-radius: 999px;
+}
+
+.tab.active:not(.primary) .tab-ico {
+  background: var(--yellow);
+  border-color: var(--ink);
+}
+
+.tab.primary .tab-ico {
+  width: 58px;
+  height: 58px;
+  margin-top: -22px;
+  background: var(--pink-hot);
+  border-color: var(--ink);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.08s ease-out;
+}
+.tab.primary:active .tab-ico {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* ---------- Toasts ---------- */
+.toasts {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--safe-bottom) + 5.75rem);
+  z-index: 60;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  pointer-events: none;
+}
+
+.toast {
+  max-width: 100%;
+  padding: 0.5rem 1.1rem;
+  font-weight: 600;
+  background: var(--yellow);
+  border: var(--bw) solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  animation: toast-in 0.2s ease-out backwards;
+}
+.toast.error {
+  background: var(--pink-hot);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view,
+  .dialog,
+  .scrim,
+  .toast,
+  .chapter-card,
+  .tab.primary .tab-ico {
+    animation: none;
+    transition: none;
+  }
+}

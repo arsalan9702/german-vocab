@@ -1,0 +1,324 @@
+/* ---------- Design tokens ---------- */
+:root {
+  --ink: #000;
+  --paper: #fff;
+  --lav: #d0c4fc;
+  --lav-2: #dcbcff;
+  --pink: #ffc4d6;
+  --pink-hot: #ff7aa8;
+  --cyan: #4cc6e6;
+  --yellow: #ffd51f;
+  --green: #a8dc8a;
+
+  --bw: 3px;
+  --r-sm: 14px;
+  --r: 22px;
+
+  /* Hard shadows only: no blur anywhere */
+  --shadow-sm: 3px 3px 0 var(--ink);
+  --shadow: 5px 5px 0 var(--ink);
+  --shadow-lg: 8px 8px 0 var(--ink);
+
+  --font-display: 'Lilita One', system-ui, sans-serif;
+  --font-script: 'Yellowtail', cursive;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-ui: 'Poppins', system-ui, sans-serif;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  background: var(--lav-2);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--lav);
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+/* ---------- Layout ---------- */
+.shell {
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+  padding-bottom: calc(var(--safe-bottom) + 1rem);
+  background: var(--pink);
+  border-left: var(--bw) solid var(--ink);
+  border-right: var(--bw) solid var(--ink);
+}
+
+.page {
+  padding: 1.25rem 1.25rem 2rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* ---------- Top bar with retro window dots ---------- */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  width: min(100%, 480px);
+  height: calc(var(--safe-top) + var(--topbar-h));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--safe-top) 1.25rem 0;
+  background: var(--lav-2);
+  border: var(--bw) solid var(--ink);
+  border-top: 0;
+}
+
+.dot {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+.dot.r { background: var(--pink-hot); }
+.dot.y { background: var(--yellow); }
+.dot.g { background: var(--green); }
+
+.topbar-title {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* ---------- Typography ---------- */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.t-script {
+  font-family: var(--font-script);
+  line-height: 1;
+}
+
+.t-serif {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-style: italic;
+}
+
+/* Big titles only: heavy outline + hard offset via stacked text-shadow */
+.t-hero {
+  color: var(--cyan);
+  text-shadow:
+    -2px -2px 0 var(--ink),
+    2px -2px 0 var(--ink),
+    -2px 2px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    5px 5px 0 var(--ink);
+}
+
+.t-hero.yellow { color: var(--yellow); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  --bg: var(--yellow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.5rem;
+  font-weight: 600;
+  background: var(--bg);
+  border: var(--bw) solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.08s ease-out;
+}
+
+/* Press: button travels toward its shadow. Shadow swap is instant, not animated. */
+.btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.btn.cyan { --bg: var(--cyan); }
+.btn.pink { --bg: var(--pink-hot); }
+.btn.green { --bg: var(--green); }
+.btn.white { --bg: var(--paper); }
+
+/* ---------- Cards ---------- */
+.card {
+  --accent: var(--paper);
+  background: var(--accent);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+}
+
+.accent-cyan { --accent: var(--cyan); }
+.accent-yellow { --accent: var(--yellow); }
+.accent-pink { --accent: var(--pink-hot); }
+.accent-green { --accent: var(--green); }
+
+/* ---------- Tags / badges ---------- */
+.tag {
+  display: inline-block;
+  padding: 0.15rem 0.75rem;
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 0.8rem;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+
+.tilt-l { transform: rotate(-4deg); }
+.tilt-r { transform: rotate(4deg); }
+
+/* ---------- Form fields ---------- */
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field > span {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.6rem 0.9rem;
+  font-size: 16px; /* prevents iOS focus zoom */
+  background: var(--paper);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-sm);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input:focus {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- Flashcard frame ---------- */
+/* The black offset block and tab live on the static wrapper; only .flip-inner rotates. */
+.frame {
+  position: relative;
+  margin-top: 14px;
+}
+
+.frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translate(10px, 10px);
+  background: var(--ink);
+  border-radius: var(--r);
+}
+
+.frame-tab {
+  position: absolute;
+  top: -14px;
+  left: 22px;
+  z-index: 0;
+  width: 96px;
+  height: 28px;
+  background: var(--lav);
+  border: var(--bw) solid var(--ink);
+  border-radius: 10px 10px 0 0;
+}
+
+.flip {
+  position: relative;
+  z-index: 1;
+  min-height: 320px;
+  perspective: 1200px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.flip-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.flip.flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--paper);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.face.back {
+  background: var(--cyan);
+  transform: rotateY(180deg);
+}
+
+/* ---------- Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner,
+  .btn {
+    transition: none;
+  }
+}
