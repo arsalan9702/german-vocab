@@ -42,38 +42,16 @@ function direction(from, to) {
 
 const SLIDE = { forward: 28, back: -28, fade: 0 }
 
-// Debug switches, set before the #: ?nav=none (no animation), ?nav=slide (no opacity), ?probe=1
-const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
-const NAV = params.get('nav')
-const PROBE = params.get('probe') === '1'
-
-// Shows how long a navigation took to render and to reach its first two frames.
-function probe(t0, tRender) {
-  requestAnimationFrame((t1) =>
-    requestAnimationFrame((t2) => {
-      let el = document.getElementById('probe')
-      if (!el) {
-        el = document.createElement('div')
-        el.id = 'probe'
-        el.style.cssText =
-          'position:fixed;top:60px;right:8px;z-index:10000;padding:4px 8px;font:12px monospace;background:#000;color:#fff;pointer-events:none;white-space:pre'
-        document.body.appendChild(el)
-      }
-      const line = `render ${Math.round(tRender - t0)}  f1 ${Math.round(t1 - t0)}  f2 ${Math.round(t2 - t0)}`
-      el.textContent = (line + '\n' + el.textContent).split('\n').slice(0, 6).join('\n')
-    }),
-  )
-}
+// Debug switches, set before the #: ?nav=none (no animation), ?nav=slide (no opacity)
+const NAV = new URLSearchParams(typeof location !== 'undefined' ? location.search : '').get('nav')
 
 function navigate(raw) {
   if (raw === s.raw) return
 
-  const t0 = performance.now()
   const dir = direction(parse(s.raw).name, parse(raw).name)
 
   s.raw = raw
   flushSync() // the new page is in the DOM right now
-  if (PROBE) probe(t0, performance.now())
 
   const scroller = document.querySelector('.shell')
   if (scroller) scroller.scrollTop = 0

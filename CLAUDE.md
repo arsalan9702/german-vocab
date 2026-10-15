@@ -27,9 +27,10 @@ Animate only transform and opacity. Performance matters.
 - Routes in `src/routes/`, components in `src/components/`, styles in `app.css` and `screens.css`.
 
 ## Roadmap
-Done: tokens, data layer, chapters, chapter detail, add/edit form, single-card view.
-Next: study mode (swipe right = known, left = learning, buttons fallback, "unknown only" option),
-fuzzy search (Fuse.js, diacritics ignored), settings with backup/restore, PWA layer, GitHub Pages workflow.
+Done: tokens, data layer, chapters, chapter detail, add/edit form, single-card view,
+study mode (swipe right = known, left = learning, buttons fallback, "learning only" option, every session shuffled),
+settings with backup/restore.
+Next: GitHub Pages workflow, fuzzy search (Fuse.js, diacritics ignored), PWA layer.
 
 ## Parked bug: page-change flicker (iOS Safari)
 - Parked 2026-10-15: cosmetic, first-load only. Resume with the switches below and `/flicker-test.html`.
@@ -40,10 +41,16 @@ fuzzy search (Fuse.js, diacritics ignored), settings with backup/restore, PWA la
 - Already tried without success: View Transitions API (removed), cloning the old page for the slide (removed),
   moving the grain off body::after, preloading data into memory, preloading fonts, will-change on .view.
 - Debug switches (set before the `#`, combinable with `&`): `?nav=none` (no animation), `?nav=slide` (slide without opacity),
-  `?grain=0` (no grain), `?probe=1` (on-screen ms: render, first frame, second frame per navigation).
-  Not yet run on a fresh tab. `public/flicker-test.html` is a plain-HTML page (no Svelte, no animation) to tell Safari from app.
+  `?grain=0` (no grain). Not yet run on a fresh tab.
+- Suspect: Safari served a stale cached build (found while debugging swipe). Dev and preview now send
+  `Cache-Control: no-store`. Recheck the flicker after clearing Safari website data.
+- `public/flicker-test.html` is a plain-HTML page (no Svelte, no animation) to tell Safari from app.
 - The installed home-screen app is shelved for now because of iOS 26 bugs (bottom gap, top edge blur).
   Test in a Safari tab.
+
+## iOS notes
+- Swipe uses touch events with a non-passive touchmove (pointer events get cancelled by Safari's pan).
+- If a change seems to have no effect on the phone, suspect a stale cache first: clear Safari website data.
 
 ## Conventions
 - Talk to me tersely; no emoji.

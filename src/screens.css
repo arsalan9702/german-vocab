@@ -111,7 +111,8 @@ body {
 }
 
 /* ---------- Buttons: extras ---------- */
-.btn:disabled {
+.btn:disabled,
+.btn.disabled {
   opacity: 0.45;
   pointer-events: none;
 }
@@ -329,6 +330,97 @@ body {
   line-height: 1.35;
 }
 
+/* ---------- Study ---------- */
+.study-bar {
+  flex: 1;
+}
+
+/* Drag follows the finger with no transition; release and fly-off ease.
+   touch-action goes on every descendant: the card face is a scroller, which
+   would otherwise claim horizontal pans for itself on iOS. */
+.swipe,
+.swipe * {
+  touch-action: pan-y;
+}
+.swipe {
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.2s ease-out;
+}
+.swipe.dragging {
+  transition: none;
+}
+
+.swipe-in {
+  animation: card-in 0.2s ease-out backwards;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.stamp {
+  position: absolute;
+  top: 28px;
+  z-index: 2;
+  padding: 0.2rem 0.9rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+.stamp.known {
+  left: 18px;
+  background: var(--green);
+  transform: rotate(-10deg);
+}
+.stamp.learning {
+  right: 18px;
+  background: var(--pink-hot);
+  transform: rotate(10deg);
+}
+
+.study-actions {
+  justify-content: center;
+}
+.study-actions .btn {
+  flex: 1;
+}
+
+/* ---------- Settings ---------- */
+.panel {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.panel-box {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  background: var(--paper);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--r-sm);
+}
+.file-name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.file-input {
+  display: none;
+}
+
 /* ---------- Dialog ---------- */
 .scrim {
   position: fixed;
@@ -459,7 +551,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .view,
+  .swipe,
+  .swipe-in,
   .dialog,
   .scrim,
   .toast,

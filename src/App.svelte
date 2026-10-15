@@ -7,6 +7,8 @@
   import Chapter from './routes/Chapter.svelte'
   import WordView from './routes/WordView.svelte'
   import WordForm from './routes/WordForm.svelte'
+  import Study from './routes/Study.svelte'
+  import Settings from './routes/Settings.svelte'
   import Placeholder from './routes/Placeholder.svelte'
 
   const r = $derived(route())
@@ -37,16 +39,11 @@
         {:else if r.name === 'edit'}
           <WordForm editId={r.id} />
         {:else if r.name === 'search'}
-          <Placeholder title="Search" note="Search across all chapters is coming soon." />
+          <Placeholder title="Search" note="Search across all chapters is coming soon...." />
         {:else if r.name === 'settings'}
-          <Placeholder title="Settings" note="Backup and restore are coming soon." />
+          <Settings />
         {:else if r.name === 'study'}
-          <Placeholder
-            title="Study"
-            note="Study mode is coming soon."
-            backHref={`/chapter/${r.id}`}
-            backLabel="Back to chapter"
-          />
+          <Study id={r.id} />
         {:else}
           <Placeholder title="Not found" note="That page does not exist." />
         {/if}
