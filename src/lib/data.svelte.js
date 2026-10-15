@@ -32,6 +32,26 @@ const stats = $derived(
   }),
 )
 
+// Load every font face up front, so no page ever swaps fonts on its first paint.
+// Capped at 1.5s so a failed font can never block the app.
+const fontsReady =
+  typeof document !== 'undefined' && document.fonts
+    ? Promise.race([
+        Promise.all(
+          [
+            '1em "Lilita One"',
+            '1em "Yellowtail"',
+            'italic 900 1em "Playfair Display"',
+            '400 1em "Poppins"',
+            '500 1em "Poppins"',
+            '600 1em "Poppins"',
+            '700 1em "Poppins"',
+          ].map((f) => document.fonts.load(f)),
+        ),
+        new Promise((r) => setTimeout(r, 1500)),
+      ]).catch(() => {})
+    : Promise.resolve()
+
 liveQuery(async () => {
   const [c, w] = await Promise.all([
     db.chapters.orderBy('createdAt').toArray(),
@@ -40,17 +60,21 @@ liveQuery(async () => {
   return { c, w }
 }).subscribe({
   next({ c, w }) {
-    chapters = c
-    words = w
-    ready = true
+    fontsReady.then(() => {
+      chapters = c
+      words = w
+      ready = true
+    })
   },
   error(e) {
     console.error('data load failed', e)
-    ready = true
+    fontsReady.then(() => {
+      ready = true
+    })
   },
 })
 
-// Same shape as the old live(): { value, ready }
+// Each export is { value, ready }. ready is true once the first load finished.
 export const app = {
   get ready() {
     return ready

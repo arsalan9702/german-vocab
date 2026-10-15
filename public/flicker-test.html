@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- Flicker isolation test: no Svelte, no Dexie, no Vite modules, no animation.
+     Plain JS swaps the page on hashchange. If this flickers on a fresh tab, the cause is Safari, not the app. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Flicker test</title>
+    <style>
+      html, body { height: 100%; margin: 0; overflow: hidden; background: #d0c4fc; font-family: system-ui, sans-serif; }
+      .shell { position: fixed; inset: 0; overflow-y: auto; background: #ffc4d6; padding: 60px 20px; }
+      .hero { font-size: 3rem; font-weight: 900; color: #4cc6e6;
+        text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 5px 5px 0 #000; }
+      .card { display: block; margin: 20px 0; padding: 16px 20px; background: #ffd51f; color: #000;
+        text-decoration: none; font-weight: 700; border: 3px solid #000; border-radius: 22px; box-shadow: 5px 5px 0 #000; }
+    </style>
+  </head>
+  <body>
+    <div class="shell" id="shell"></div>
+    <script>
+      const pages = {
+        a: '<h1 class="hero">PAGE A</h1>' + [1, 2, 3, 4].map((i) => `<a class="card" href="#b">Go to B (${i})</a>`).join(''),
+        b: '<h1 class="hero">PAGE B</h1>' + [1, 2, 3, 4].map((i) => `<a class="card" href="#a">Back to A (${i})</a>`).join(''),
+      }
+      const render = () => {
+        document.getElementById('shell').innerHTML = pages[location.hash.slice(1)] || pages.a
+      }
+      addEventListener('hashchange', render)
+      render()
+    </script>
+  </body>
+</html>

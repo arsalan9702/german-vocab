@@ -9,6 +9,12 @@ a {
   --topbar-h: 48px;
 }
 
+/* One permanent layer for the page. The slide animation then never
+   creates or destroys a layer, which is what WebKit repaints on. */
+.view {
+  will-change: transform, opacity;
+}
+
 /* The document never scrolls. .shell is the one scroller. */
 html,
 body {

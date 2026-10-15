@@ -36,22 +36,6 @@ export function listChapters() {
   return db.chapters.orderBy('createdAt').toArray()
 }
 
-// Chapters plus { total, known } counts, for the home screen.
-export function listChaptersWithStats() {
-  return db.transaction('r', db.chapters, db.words, async () => {
-    const chapters = await db.chapters.orderBy('createdAt').toArray()
-    return Promise.all(
-      chapters.map(async (c) => {
-        const [total, known] = await Promise.all([
-          db.words.where('chapterId').equals(c.id).count(),
-          db.words.where('[chapterId+status]').equals([c.id, STATUS.KNOWN]).count(),
-        ])
-        return { ...c, total, known }
-      }),
-    )
-  })
-}
-
 export function createChapter(title) {
   const t = validTitle(title)
   return db.transaction('rw', db.chapters, async () => {

@@ -1,121 +1,121 @@
 <script>
-   import { chapterList as chapters, wordById, hasChapter, wordUpdatedAt, until } from '../lib/data.svelte.js'
-   import { back } from '../lib/router.svelte.js'
-   import { toast } from '../lib/toast.svelte.js'
-   import Smiley from '../components/Smiley.svelte'
-   import { createChapter, addWord, updateWord, findDuplicates, ValidationError } from '../lib/store.js'
- 
-   let { editId = null, presetChapter = null } = $props()
- 
-   const NEW = '__new__'
-   const LAST_KEY = 'gv:lastChapter'
-   const FIELDS = ['chapterId', 'de', 'deExample', 'en', 'enExample']
- 
-   // Everything is read synchronously from memory, so the form is complete on its first frame.
-   const existing = editId ? wordById(editId).value : null
-   const missing = !!editId && !existing
- 
-   const options = $derived(chapters.value)
-   const chapterTitle = (id) => options.find((c) => c.id === id)?.title ?? ''
- 
-   function initialChoice() {
-     if (editId) return existing?.chapterId ?? ''
-     const ids = new Set(chapters.value.map((c) => c.id))
-     let last = null
-     try {
-       last = localStorage.getItem(LAST_KEY)
-     } catch {}
-     return [presetChapter, last].find((id) => id && ids.has(id)) ?? (ids.size === 0 ? NEW : '')
-   }
- 
-   let choice = $state(initialChoice())
-   let newName = $state('')
-   let creating = $state(false)
- 
-   let de = $state(existing?.de ?? '')
-   let deExample = $state(existing?.deExample ?? '')
-   let en = $state(existing?.en ?? '')
-   let enExample = $state(existing?.enExample ?? '')
- 
-   let errors = $state({})
-   let saving = $state(false)
-   let dupes = $state([])
-   let deInput = $state()
- 
-   // Duplicate warning on the German term (debounced).
-   $effect(() => {
-     const term = de
-     const handle = setTimeout(async () => {
-       dupes = await findDuplicates(term, editId)
-     }, 250)
-     return () => clearTimeout(handle)
-   })
- 
-   async function makeChapter() {
-     if (creating) return
-     creating = true
-     errors.newChapter = ''
-     try {
-       const c = await createChapter(newName)
-       await until(() => hasChapter(c.id))
-       choice = c.id
-       newName = ''
-       toast(`Chapter created: ${c.title}`)
-     } catch (e) {
-       if (e instanceof ValidationError) errors.newChapter = e.message
-       else {
-         console.error(e)
-         errors.newChapter = 'Could not create the chapter.'
-       }
-     } finally {
-       creating = false
-     }
-   }
- 
-   function remember(id) {
-     try {
-       localStorage.setItem(LAST_KEY, id)
-     } catch {}
-   }
- 
-   async function save(e) {
-     e.preventDefault()
-     if (saving) return
-     errors = {}
-     if (choice === NEW) {
-       errors.chapterId = 'Tap "Create chapter" first.'
-       return
-     }
-     saving = true
-     const input = { chapterId: choice, de, deExample, en, enExample }
-     try {
-       if (editId) {
-         const updated = await updateWord(editId, input)
-         await until(() => wordUpdatedAt(editId) === updated.updatedAt)
-         toast('Changes saved')
-         back(`/word/${editId}`)
-       } else {
-         const w = await addWord(input)
-         remember(choice)
-         toast(`Added: ${w.de}`)
-         de = ''
-         deExample = ''
-         en = ''
-         enExample = ''
-         dupes = []
-         deInput?.focus()
-       }
-     } catch (err) {
-       if (err instanceof ValidationError && FIELDS.includes(err.field)) {
-         errors[err.field] = err.message
-       } else {
-         console.error(err)
-         toast(err instanceof ValidationError ? err.message : 'Something went wrong', 'error')
-       }
-     } finally {
-       saving = false
-     }
-   }
+  import { chapterList as chapters, wordById, hasChapter, wordUpdatedAt, until } from '../lib/data.svelte.js'
+  import { back } from '../lib/router.svelte.js'
+  import { toast } from '../lib/toast.svelte.js'
+  import Smiley from '../components/Smiley.svelte'
+  import { createChapter, addWord, updateWord, findDuplicates, ValidationError } from '../lib/store.js'
+
+  let { editId = null, presetChapter = null } = $props()
+
+  const NEW = '__new__'
+  const LAST_KEY = 'gv:lastChapter'
+  const FIELDS = ['chapterId', 'de', 'deExample', 'en', 'enExample']
+
+  // Everything is read synchronously from memory, so the form is complete on its first frame.
+  const existing = editId ? wordById(editId).value : null
+  const missing = !!editId && !existing
+
+  const options = $derived(chapters.value)
+  const chapterTitle = (id) => options.find((c) => c.id === id)?.title ?? ''
+
+  function initialChoice() {
+    if (editId) return existing?.chapterId ?? ''
+    const ids = new Set(chapters.value.map((c) => c.id))
+    let last = null
+    try {
+      last = localStorage.getItem(LAST_KEY)
+    } catch {}
+    return [presetChapter, last].find((id) => id && ids.has(id)) ?? (ids.size === 0 ? NEW : '')
+  }
+
+  let choice = $state(initialChoice())
+  let newName = $state('')
+  let creating = $state(false)
+
+  let de = $state(existing?.de ?? '')
+  let deExample = $state(existing?.deExample ?? '')
+  let en = $state(existing?.en ?? '')
+  let enExample = $state(existing?.enExample ?? '')
+
+  let errors = $state({})
+  let saving = $state(false)
+  let dupes = $state([])
+  let deInput = $state()
+
+  // Duplicate warning on the German term (debounced).
+  $effect(() => {
+    const term = de
+    const handle = setTimeout(async () => {
+      dupes = await findDuplicates(term, editId)
+    }, 250)
+    return () => clearTimeout(handle)
+  })
+
+  async function makeChapter() {
+    if (creating) return
+    creating = true
+    errors.newChapter = ''
+    try {
+      const c = await createChapter(newName)
+      await until(() => hasChapter(c.id))
+      choice = c.id
+      newName = ''
+      toast(`Chapter created: ${c.title}`)
+    } catch (e) {
+      if (e instanceof ValidationError) errors.newChapter = e.message
+      else {
+        console.error(e)
+        errors.newChapter = 'Could not create the chapter.'
+      }
+    } finally {
+      creating = false
+    }
+  }
+
+  function remember(id) {
+    try {
+      localStorage.setItem(LAST_KEY, id)
+    } catch {}
+  }
+
+  async function save(e) {
+    e.preventDefault()
+    if (saving) return
+    errors = {}
+    if (choice === NEW) {
+      errors.chapterId = 'Tap "Create chapter" first.'
+      return
+    }
+    saving = true
+    const input = { chapterId: choice, de, deExample, en, enExample }
+    try {
+      if (editId) {
+        const updated = await updateWord(editId, input)
+        await until(() => wordUpdatedAt(editId) === updated.updatedAt)
+        toast('Changes saved')
+        back(`/word/${editId}`)
+      } else {
+        const w = await addWord(input)
+        remember(choice)
+        toast(`Added: ${w.de}`)
+        de = ''
+        deExample = ''
+        en = ''
+        enExample = ''
+        dupes = []
+        deInput?.focus()
+      }
+    } catch (err) {
+      if (err instanceof ValidationError && FIELDS.includes(err.field)) {
+        errors[err.field] = err.message
+      } else {
+        console.error(err)
+        toast(err instanceof ValidationError ? err.message : 'Something went wrong', 'error')
+      }
+    } finally {
+      saving = false
+    }
+  }
 </script>
 
 {#if missing}

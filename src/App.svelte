@@ -10,9 +10,10 @@
   import Placeholder from './routes/Placeholder.svelte'
 
   const r = $derived(route())
+  const showGrain = new URLSearchParams(location.search).get('grain') !== '0'
 </script>
 
-<div class="grain" aria-hidden="true"></div>
+{#if showGrain}<div class="grain" aria-hidden="true"></div>{/if}
 
 <header class="topbar">
   <span class="dot r"></span>
