@@ -52,6 +52,7 @@
   {:else}
     <main class="page">
       <p class="hint">Loading…</p>
+      
     </main>
   {/if}
 </div>

@@ -3,6 +3,7 @@
   import { exportData, importBackup, parseBackup, backupFilename, ValidationError } from '../lib/store.js'
   import { portal } from '../lib/portal.js'
   import { toast } from '../lib/toast.svelte.js'
+  import { sync, syncNow, connect, disconnect } from '../lib/sync.svelte.js'
 
   const LAST_KEY = 'gv:lastBackup'
 
@@ -19,6 +20,36 @@
   let pending = $state(null) // { text, name, chapters, words, invalid }
   let result = $state(null)
   let confirming = $state(false)
+
+  let token = $state('')
+  let connecting = $state(false)
+  let now = $state(Date.now())
+  $effect(() => {
+    const t = setInterval(() => (now = Date.now()), 30_000)
+    return () => clearInterval(t)
+  })
+
+  const TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=gist&description=German%20Vocab'
+
+  function ago(t) {
+    const s = Math.max(0, Math.round((now - t) / 1000))
+    if (s < 60) return 'just now'
+    if (s < 3600) return `${Math.floor(s / 60)} min ago`
+    if (s < 86400) return `${Math.floor(s / 3600)} h ago`
+    return fmt(new Date(t))
+  }
+
+  async function link(e) {
+    e.preventDefault()
+    if (connecting || !token.trim()) return
+    connecting = true
+    await connect(token)
+    connecting = false
+    if (sync.status !== 'off') {
+      token = ''
+      toast('Cloud sync is on')
+    }
+  }
 
   navigator.storage?.persisted?.().then((p) => (persisted = p)).catch(() => {})
 
@@ -94,6 +125,8 @@
       // Replace wipes everything, so the current data is always downloaded first.
       if (mode === 'replace') download(await exportData())
       result = await importBackup(pending.text, mode)
+      // Otherwise the next sync would merge the replaced data back in from the gist.
+      if (mode === 'replace') syncNow({ pull: false })
       pending = null
       confirming = false
       toast(mode === 'replace' ? 'Data replaced' : 'Backup merged')
@@ -114,6 +147,61 @@
   <section class="head">
     <div class="t-script title-script">Your</div>
     <h1 class="t-display t-hero title-hero">SETTINGS</h1>
+  </section>
+
+  <section class="card accent-green panel">
+    <h2 class="panel-title">Cloud sync</h2>
+    {#if sync.status === 'off'}
+      <p>
+        Keep a copy in a private GitHub gist. It updates a few seconds after every change and when you
+        open the app.
+      </p>
+      <ol class="steps">
+        <li>
+          <a class="link" href={TOKEN_URL} target="_blank" rel="noopener">Create a GitHub token</a>
+          (the gist scope is already ticked; pick any expiry).
+        </li>
+        <li>Paste it below. It is stored only on this phone.</li>
+      </ol>
+      <form class="panel" onsubmit={link}>
+        <input
+          class="input"
+          type="password"
+          bind:value={token}
+          placeholder="ghp_…"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+        />
+        <button class="btn white" type="submit" disabled={connecting || !token.trim()}>
+          {connecting ? 'Connecting…' : 'Connect'}
+        </button>
+      </form>
+      {#if sync.error}<p class="field-error">{sync.error}</p>{/if}
+    {:else}
+      <p class="sync-line">
+        <span class="status-dot" class:known={sync.status === 'idle'} class:bad={sync.status === 'error'}></span>
+        {#if sync.status === 'syncing'}
+          Syncing…
+        {:else if sync.status === 'offline'}
+          Offline. Changes upload when you're back online.
+        {:else if sync.status === 'error'}
+          Sync failed
+        {:else}
+          Synced {sync.lastSync ? ago(sync.lastSync) : ''}
+        {/if}
+      </p>
+      {#if sync.status === 'error'}<p class="field-error">{sync.error}</p>{/if}
+      {#if sync.gistUrl}
+        <a class="link" href={sync.gistUrl} target="_blank" rel="noopener">Open the gist</a>
+      {/if}
+      <div class="row">
+        <button class="btn white" onclick={() => syncNow()} disabled={sync.status === 'syncing'}>
+          Sync now
+        </button>
+        <button class="btn sm white" onclick={() => disconnect()}>Disconnect</button>
+      </div>
+    {/if}
   </section>
 
   <section class="card accent-cyan panel">

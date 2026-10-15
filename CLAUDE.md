@@ -13,7 +13,9 @@ Phone-only (iPhone, Safari) flashcard web app for learning German vocab.
 - Word fields: de, deExample, en, enExample, status (learning | known), chapterId.
 - Chapters in creation order; words in the order they were added.
 - Backup: JSON export/import. Merge by id (newer updatedAt wins) plus replace-all behind a confirm that auto-exports first.
-- Device-only storage, no backend.
+- Device is the source of truth and works offline. Optional cloud copy in a private GitHub gist
+  (`src/lib/sync.svelte.js`): pull, merge by id (newer updatedAt wins), push if changed. Runs on open,
+  on app hide/show, when back online, and 3s after any write. Replace-all pushes without pulling.
 
 ## Design
 Neo-brutalist 90s/Y2K: lavender/pink pastels, cyan/yellow/pink/green accents, thick black borders,
@@ -29,7 +31,7 @@ Animate only transform and opacity. Performance matters.
 ## Roadmap
 Done: tokens, data layer, chapters, chapter detail, add/edit form, single-card view,
 study mode (swipe right = known, left = learning, buttons fallback, "learning only" option, every session shuffled),
-settings with backup/restore.
+settings with backup/restore, GitHub gist sync.
 Next: GitHub Pages workflow, fuzzy search (Fuse.js, diacritics ignored), PWA layer.
 
 ## Parked bug: page-change flicker (iOS Safari)

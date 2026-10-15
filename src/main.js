@@ -12,8 +12,10 @@ import { mount } from 'svelte'
 import App from './App.svelte'
 import { db } from './lib/db.js'
 import * as store from './lib/store.js'
+import { startSync } from './lib/sync.svelte.js'
 
 store.requestPersistence()
+startSync()
 
 // Console access for testing on desktop. Stripped from production builds.
 if (import.meta.env.DEV) {

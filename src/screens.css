@@ -420,6 +420,27 @@ body {
 .file-input {
   display: none;
 }
+.panel form.panel {
+  width: 100%;
+}
+.steps {
+  display: grid;
+  gap: 0.35rem;
+  padding-left: 1.2rem;
+}
+.link {
+  font-weight: 700;
+  text-decoration: underline;
+}
+.sync-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+.status-dot.bad {
+  background: var(--pink-hot);
+}
 
 /* ---------- Dialog ---------- */
 .scrim {
