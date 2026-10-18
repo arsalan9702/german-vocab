@@ -34,21 +34,11 @@ study mode (swipe right = known, left = learning, buttons fallback, "learning on
 settings with backup/restore, GitHub gist sync, GitHub Pages deploy (`.github/workflows/deploy.yml`, every push to main).
 Next: fuzzy search (Fuse.js, diacritics ignored), PWA layer.
 
-## Parked bug: page-change flicker (iOS Safari)
-- Parked 2026-10-15: cosmetic, first-load only. Resume with the switches below and `/flicker-test.html`.
-- Every page change flickers in place (content does not move).
-- It disappears after reloading the tab (now once; earlier 5-6 times) and returns after the tab is closed and reopened.
-  Something cold on a fresh load becomes cached; CSS alone cannot explain this.
-- Present in both the dev server and `npm run build && npm run preview`.
-- Already tried without success: View Transitions API (removed), cloning the old page for the slide (removed),
-  moving the grain off body::after, preloading data into memory, preloading fonts, will-change on .view.
-- Debug switches (set before the `#`, combinable with `&`): `?nav=none` (no animation), `?nav=slide` (slide without opacity),
-  `?grain=0` (no grain). Not yet run on a fresh tab.
-- Suspect: Safari served a stale cached build (found while debugging swipe). Dev and preview now send
-  `Cache-Control: no-store`. Recheck the flicker after clearing Safari website data.
-- `public/flicker-test.html` is a plain-HTML page (no Svelte, no animation) to tell Safari from app.
+## Resolved: page-change flicker (iOS Safari)
+- Fixed itself on the GitHub Pages deploy (2026-10-18); never reproduced there. Most likely Safari was
+  serving stale cached builds from the LAN dev/preview server (now `Cache-Control: no-store`).
+- Leftover debug tools, removable: `?nav=none|slide` and `?grain=0` switches, `public/flicker-test.html`.
 - The installed home-screen app is shelved for now because of iOS 26 bugs (bottom gap, top edge blur).
-  Test in a Safari tab.
 
 ## iOS notes
 - Swipe uses touch events with a non-passive touchmove (pointer events get cancelled by Safari's pan).
