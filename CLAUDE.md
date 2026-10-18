@@ -31,8 +31,8 @@ Animate only transform and opacity. Performance matters.
 ## Roadmap
 Done: tokens, data layer, chapters, chapter detail, add/edit form, single-card view,
 study mode (swipe right = known, left = learning, buttons fallback, "learning only" option, every session shuffled),
-settings with backup/restore, GitHub gist sync.
-Next: GitHub Pages workflow, fuzzy search (Fuse.js, diacritics ignored), PWA layer.
+settings with backup/restore, GitHub gist sync, GitHub Pages deploy (`.github/workflows/deploy.yml`, every push to main).
+Next: fuzzy search (Fuse.js, diacritics ignored), PWA layer.
 
 ## Parked bug: page-change flicker (iOS Safari)
 - Parked 2026-10-15: cosmetic, first-load only. Resume with the switches below and `/flicker-test.html`.
