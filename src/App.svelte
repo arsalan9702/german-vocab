@@ -9,6 +9,7 @@
   import WordForm from './routes/WordForm.svelte'
   import Study from './routes/Study.svelte'
   import Settings from './routes/Settings.svelte'
+  import Search from './routes/Search.svelte'
   import Placeholder from './routes/Placeholder.svelte'
 
   const r = $derived(route())
@@ -39,7 +40,7 @@
         {:else if r.name === 'edit'}
           <WordForm editId={r.id} />
         {:else if r.name === 'search'}
-          <Placeholder title="Search" note="Search across all chapters is coming soon...." />
+          <Search initial={r.query.get('q') ?? ''} />
         {:else if r.name === 'settings'}
           <Settings />
         {:else if r.name === 'study'}

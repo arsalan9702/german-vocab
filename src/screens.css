@@ -247,6 +247,11 @@ body {
   font-weight: 700;
   overflow-wrap: anywhere;
 }
+.word-chapter {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.55;
+}
 .word-en {
   font-size: 0.9rem;
   opacity: 0.75;

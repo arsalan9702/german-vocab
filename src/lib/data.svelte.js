@@ -1,5 +1,7 @@
 import { liveQuery } from 'dexie'
 import { db } from './db.js'
+import Fuse from 'fuse.js'
+import { fold } from './text.js'
 
 // The whole vocab lives in memory. Pages read it synchronously, so they render
 // complete on the first frame. Writes go to the database; this follows by itself.
@@ -30,6 +32,28 @@ const stats = $derived(
     for (const w of list) if (w.status === 'known') known++
     return { ...c, total: list.length, known }
   }),
+)
+
+// Fuzzy search over every word, rebuilt only when the data changes. Fields are folded
+// (see text.js), so umlauts, accents and ß never have to be typed.
+const searchIndex = $derived(
+  new Fuse(
+    words.map((w) => ({
+      w,
+      de: fold(w.de),
+      en: fold(w.en),
+      ex: fold(`${w.deExample} ${w.enExample}`),
+    })),
+    {
+      keys: [
+        { name: 'de', weight: 3 },
+        { name: 'en', weight: 3 },
+        { name: 'ex', weight: 1 },
+      ],
+      ignoreLocation: true,
+      threshold: 0.35,
+    },
+  ),
 )
 
 // Load every font face up front, so no page ever swaps fonts on its first paint.
@@ -131,4 +155,9 @@ export async function until(predicate, ms = 1500) {
   while (!predicate() && performance.now() < end) {
     await new Promise((r) => setTimeout(r, 8))
   }
+}
+
+export function searchWords(query, limit = 50) {
+  const q = fold(query)
+  return q ? searchIndex.search(q, { limit }).map((r) => r.item.w) : []
 }
