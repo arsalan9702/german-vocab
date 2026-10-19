@@ -396,6 +396,9 @@ body {
 .study-actions .btn {
   flex: 1;
 }
+.end-session {
+  justify-self: center;
+}
 
 /* ---------- Settings ---------- */
 .panel {

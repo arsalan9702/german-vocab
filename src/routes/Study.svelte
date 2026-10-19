@@ -4,56 +4,62 @@
   import { toast } from '../lib/toast.svelte.js'
   import Flashcard from '../components/Flashcard.svelte'
   import Smiley from '../components/Smiley.svelte'
+  import { buildDeck, requeue } from '../lib/study.js'
 
   let { id } = $props()
 
   const MODE_KEY = 'gv:studyMode'
+  const DIR_KEY = 'gv:studyDir'
   const chapter = chapterById(id)
   const words = wordsOf(id)
 
   const total = $derived(words.value.length)
   const learningCount = $derived(words.value.filter((w) => w.status !== STATUS.KNOWN).length)
 
-  function savedMode() {
+  const saved = (key, allowed, fallback) => {
     try {
-      return localStorage.getItem(MODE_KEY) === 'learning' ? 'learning' : 'all'
+      const v = localStorage.getItem(key)
+      return allowed.includes(v) ? v : fallback
     } catch {
-      return 'all'
+      return fallback
     }
   }
-
-  // Fisher-Yates. Every session is shuffled, so order never becomes a memory cue.
-  function shuffle(list) {
-    const a = [...list]
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[a[i], a[j]] = [a[j], a[i]]
-    }
-    return a
+  const save = (key, v) => {
+    try {
+      localStorage.setItem(key, v)
+    } catch {}
   }
 
   // The deck is a snapshot: marking a card known never reshuffles the session.
   const build = (m) =>
-    shuffle(m === 'learning' ? words.value.filter((w) => w.status !== STATUS.KNOWN) : words.value)
+    buildDeck(m === 'learning' ? words.value.filter((w) => w.status !== STATUS.KNOWN) : words.value)
 
-  let mode = $state(savedMode())
+  let mode = $state(saved(MODE_KEY, ['all', 'learning'], 'all'))
+  let dir = $state(saved(DIR_KEY, ['de', 'en', 'mixed'], 'de'))
   let deck = $state.raw(build(mode))
   let index = $state(0)
-  let result = $state({ known: 0, learning: 0 })
+  // Only the first answer of a session sets the status; retries are practice.
+  let answered = new Set()
+  let result = $state({ known: 0, learning: 0, retries: 0 })
 
   const card = $derived(deck[index])
   const done = $derived(index >= deck.length)
+  const side = $derived(card ? (dir === 'mixed' ? card.mix : dir) : 'de')
 
   function start(m) {
     mode = m
-    try {
-      localStorage.setItem(MODE_KEY, m)
-    } catch {}
+    save(MODE_KEY, m)
     deck = build(m)
     index = 0
-    result = { known: 0, learning: 0 }
+    answered = new Set()
+    result = { known: 0, learning: 0, retries: 0 }
     dx = 0
     leaving = false
+  }
+
+  function setDir(d) {
+    dir = d
+    save(DIR_KEY, d)
   }
 
   /* ---------- Swipe ---------- */
@@ -72,13 +78,20 @@
   function decide(status) {
     if (leaving || !card) return
     leaving = true
-    const w = card
-    result[status === STATUS.KNOWN ? 'known' : 'learning']++
-    if (w.status !== status) {
-      setStatus(w.id, status).catch((e) => {
-        console.error(e)
-        toast('Could not save', 'error')
-      })
+    const w = card.word
+    if (!answered.has(w.id)) {
+      answered.add(w.id)
+      result[status === STATUS.KNOWN ? 'known' : 'learning']++
+      if (w.status !== status) {
+        setStatus(w.id, status).catch((e) => {
+          console.error(e)
+          toast('Could not save', 'error')
+        })
+      }
+    }
+    if (status === STATUS.LEARNING) {
+      deck = requeue(deck, index)
+      result.retries++
     }
     dragging = false
     dx = (status === STATUS.KNOWN ? 1 : -1) * window.innerWidth * 1.2
@@ -231,6 +244,11 @@
           Learning only {learningCount}
         </button>
       </div>
+      <div class="chips" role="group" aria-label="Which side first">
+        {#each [['de', 'German first'], ['en', 'English first'], ['mixed', 'Mixed']] as [d, label] (d)}
+          <button class="chip" aria-pressed={dir === d} onclick={() => setDir(d)}>{label}</button>
+        {/each}
+      </div>
 
       {#if deck.length === 0}
         <section class="empty">
@@ -242,7 +260,10 @@
         <section class="empty">
           <Smiley size={110} />
           <h2 class="t-display t-hero title-hero sm">DONE!</h2>
-          <p class="stat-line">{result.known} known · {result.learning} learning</p>
+          <p class="stat-line">
+            {result.known} known first try · {result.learning} to keep learning · {result.retries}
+            {result.retries === 1 ? 'retry' : 'retries'}
+          </p>
           <div class="row study-actions">
             <button class="btn cyan" onclick={() => start(mode)}>Study again</button>
             {#if mode === 'all' && learningCount > 0}
@@ -256,10 +277,10 @@
           <div class="bar study-bar" role="progressbar" aria-valuemin="0" aria-valuemax={deck.length} aria-valuenow={index} style="--p: {index / deck.length}">
             <i></i>
           </div>
-          <span class="tag tilt-r">{index + 1} / {deck.length}</span>
+          <span class="tag tilt-r">{deck.length - index} left</span>
         </div>
 
-        {#key card.id}
+        {#key `${card.key}-${side}`}
           <div
             class="swipe"
             role="group"
@@ -277,17 +298,24 @@
             <div class="swipe-in">
               <span class="stamp known" style="opacity: {clamp(dx / 90)}">Known</span>
               <span class="stamp learning" style="opacity: {clamp(-dx / 90)}">Learning</span>
-              <Flashcard de={card.de} deExample={card.deExample} en={card.en} enExample={card.enExample} />
+              <Flashcard
+                de={card.word.de}
+                deExample={card.word.deExample}
+                en={card.word.en}
+                enExample={card.word.enExample}
+                start={side}
+              />
             </div>
           </div>
         {/key}
 
-        <p class="hint">Tap to flip. Swipe right if you know it, left to keep learning.</p>
+        <p class="hint">Tap to flip. Swipe right if you know it, left to see it again later.</p>
 
         <div class="row study-actions">
           <button class="btn pink" onclick={() => decide(STATUS.LEARNING)}>‹ Learning</button>
           <button class="btn green" onclick={() => decide(STATUS.KNOWN)}>Known ›</button>
         </div>
+        <button class="btn sm white end-session" onclick={() => (index = deck.length)}>End session</button>
       {/if}
     {/if}
   </main>
