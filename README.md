@@ -74,14 +74,18 @@
 **Learn**
 
 - **Study mode.** Swipe right for *known*, left for *learning*. Buttons and arrow keys do the same.
+- **Missed cards come back.** A card you swipe left returns a few cards later until you get it. Only your first answer of a session counts, so a lucky third try doesn't mark a word known.
+- **Either direction.** German first, English first, or mixed per card. English first is the harder drill.
 - **Shuffled every time.** Card order never becomes a memory cue.
 - **Learning only.** Drill just the words you don't know yet.
-- **Flip cards.** German on the front, English on the back, each with an example sentence.
+- **Gender colours.** Nouns are tinted by article: *der* cyan, *die* pink, *das* green. Mark plurals with `(pl.)`, as in `die Hunde (pl.)`, and they stay neutral.
+- **Flip cards.** Tap to flip between German and English, each with an example sentence.
 
 **Organise**
 
 - **Chapters** in the order you created them, with live progress bars.
 - **Words** with a German term, English translation and an example sentence in each language.
+- **Search** across every chapter in German or English. Umlauts, accents and ß are optional: `strasse` finds *Straße*, and a one-letter typo still finds the word.
 - **Duplicate warning** when a German term already exists anywhere in your vocab.
 - **Nothing gets deleted.** Chapters and words can be edited, never removed, so a slip of the thumb can't lose work.
 
@@ -180,12 +184,14 @@ german-vocab/
     ├── app.css                    tokens, base, buttons, cards, flashcard
     ├── screens.css                layout and per-screen styles
     ├── components/                Flashcard, TabBar, ChapterDialog, Toasts, Smiley
-    ├── routes/                    Chapters, Chapter, WordView, WordForm, Study, Settings, Placeholder
+    ├── routes/                    Chapters, Chapter, WordView, WordForm, Study, Search, Settings, Placeholder
     └── lib/
         ├── db.js                  Dexie schema
         ├── store.js               all writes, validation, backup format
         ├── data.svelte.js         in-memory dataset via liveQuery
         ├── sync.svelte.js         GitHub gist sync
+        ├── study.js               shuffle, deck and retry queue
+        ├── gender.js              der / die / das from the German term
         ├── router.svelte.js       hash router and page transitions
         └── portal.js, toast.svelte.js, ids.js, text.js
 ```
@@ -204,11 +210,12 @@ Two lessons that cost real debugging time:
 ## Roadmap
 
 - [x] Chapters, words, add and edit
-- [x] Flashcards and study mode with swipe and shuffle
+- [x] Flashcards and study mode with swipe, shuffle, retries and direction
+- [x] der / die / das colours
 - [x] Backup and restore
 - [x] GitHub gist sync
 - [x] GitHub Pages deploy
-- [ ] Fuzzy search across all chapters (Fuse.js, umlauts ignored)
+- [x] Fuzzy search across all chapters (Fuse.js, umlauts ignored)
 - [ ] Home-screen app (PWA)
 
 ---

@@ -11,6 +11,10 @@ Phone-only (iPhone, Safari) flashcard web app for learning German vocab.
 - UI text is English only. German appears only as flashcard content.
 - Chapters and words can be created and edited, never deleted.
 - Word fields: de, deExample, en, enExample, status (learning | known), chapterId.
+- Gender is derived, never stored: leading der/die/das in `de` (`src/lib/gender.js`). Terms containing
+  `(pl.)` or `(pl)` get no gender. Colours: der cyan, die hot pink, das green; German face only.
+- Study: every session shuffled; a left swipe requeues the card 3-6 later; only the first answer of a
+  session sets status (retries are practice); direction de / en / mixed (`src/lib/study.js`).
 - Chapters in creation order; words in the order they were added.
 - Backup: JSON export/import. Merge by id (newer updatedAt wins) plus replace-all behind a confirm that auto-exports first.
 - Device is the source of truth and works offline. Optional cloud copy in a private GitHub gist
@@ -30,9 +34,10 @@ Animate only transform and opacity. Performance matters.
 
 ## Roadmap
 Done: tokens, data layer, chapters, chapter detail, add/edit form, single-card view,
-study mode (swipe right = known, left = learning, buttons fallback, "learning only" option, every session shuffled),
-settings with backup/restore, GitHub gist sync, GitHub Pages deploy (`.github/workflows/deploy.yml`, every push to main).
-Next: fuzzy search (Fuse.js, diacritics ignored), PWA layer.
+study mode (swipe, buttons fallback, "learning only", shuffle, retries, direction), gender colours,
+settings with backup/restore, GitHub gist sync, GitHub Pages deploy (`.github/workflows/deploy.yml`, every push to main),
+search (Fuse.js over `fold()`ed fields in `data.svelte.js`; transposed letters in short words don't match).
+Next: PWA layer.
 
 ## Resolved: page-change flicker (iOS Safari)
 - Fixed itself on the GitHub Pages deploy (2026-10-18); never reproduced there. Most likely Safari was
