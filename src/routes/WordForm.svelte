@@ -186,6 +186,7 @@
           spellcheck="false"
           enterkeyhint="next"
         />
+        <small class="muted">Start nouns with der, die or das. Mark plurals with (pl.): die Hunde (pl.)</small>
         {#if errors.de}<small class="field-error">{errors.de}</small>{/if}
       </label>
 

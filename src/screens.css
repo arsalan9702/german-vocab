@@ -221,6 +221,11 @@ body {
 .word-row:active {
   background: var(--yellow);
 }
+/* Gender stripe inside the black border */
+.word-row.g-der { box-shadow: inset 10px 0 0 var(--der); }
+.word-row.g-die { box-shadow: inset 10px 0 0 var(--die); }
+.word-row.g-das { box-shadow: inset 10px 0 0 var(--das); }
+.word-row[class*='g-d'] { padding-left: 1.4rem; }
 
 .status-dot {
   flex: none;

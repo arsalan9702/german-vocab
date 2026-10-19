@@ -10,6 +10,11 @@
   --yellow: #ffd51f;
   --green: #a8dc8a;
 
+  /* Noun genders, close to the usual learner blue / red / green */
+  --der: var(--cyan);
+  --die: var(--pink-hot);
+  --das: var(--green);
+
   --bw: 3px;
   --r-sm: 14px;
   --r: 22px;
@@ -311,9 +316,14 @@ button {
 }
 
 .face.back {
-  background: var(--cyan);
   transform: rotateY(180deg);
 }
+
+/* German face: gender colour (white without an article). English face: yellow. */
+.face.g-der { background: var(--der); }
+.face.g-die { background: var(--die); }
+.face.g-das { background: var(--das); }
+.face.en-face { background: var(--yellow); }
 
 /* ---------- Motion ---------- */
 @media (prefers-reduced-motion: reduce) {

@@ -4,6 +4,7 @@
   import { toast } from '../lib/toast.svelte.js'
   import ChapterDialog from '../components/ChapterDialog.svelte'
   import Smiley from '../components/Smiley.svelte'
+  import { genderOf } from '../lib/gender.js'
 
   let { id } = $props()
 
@@ -76,7 +77,7 @@
         <ul class="word-list">
           {#each shown as w (w.id)}
             <li>
-              <a class="word-row" href={'#/word/' + w.id}>
+              <a class="word-row g-{genderOf(w.de) ?? 'none'}" href={'#/word/' + w.id}>
                 <span class="status-dot" class:known={w.status === 'known'}></span>
                 <span class="word-text">
                   <span class="word-de">{w.de}</span>
