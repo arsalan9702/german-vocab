@@ -77,13 +77,14 @@
 - **Missed cards come back.** A card you swipe left returns a few cards later until you get it. Only your first answer of a session counts, so a lucky third try doesn't mark a word known.
 - **Either direction.** German first, English first, or mixed per card. English first is the harder drill.
 - **Shuffled every time.** Card order never becomes a memory cue.
+- **Bite-sized sessions.** Pick 10, 20 or 30 different words per session, drawn at random from the chapter.
 - **Learning only.** Drill just the words you don't know yet.
 - **Gender colours.** Nouns are tinted by article: *der* cyan, *die* pink, *das* green. Mark plurals with `(pl.)`, as in `die Hunde (pl.)`, and they stay neutral.
 - **Flip cards.** Tap to flip between German and English, each with an example sentence.
 
 **Organise**
 
-- **Chapters** in the order you created them, with live progress bars.
+- **Chapters** sorted by their number (Kapitel 2 before Kapitel 10), with live progress bars.
 - **Words** with a German term, English translation and an example sentence in each language.
 - **Search** across every chapter in German or English. Umlauts, accents and ß are optional: `strasse` finds *Straße*, and a one-letter typo still finds the word.
 - **Duplicate warning** when a German term already exists anywhere in your vocab.

@@ -15,7 +15,10 @@ Phone-only (iPhone, Safari) flashcard web app for learning German vocab.
   `(pl.)` or `(pl)` get no gender. Colours: der cyan, die hot pink, das green; German face only.
 - Study: every session shuffled; a left swipe requeues the card 3-6 later; only the first answer of a
   session sets status (retries are practice); direction de / en / mixed (`src/lib/study.js`).
-- Chapters in creation order; words in the order they were added.
+  Each session first asks how many different words: 10, 20 or 30, picked at random from the pool
+  (all / learning only). A size is offered if the pool fills it or it is the first size covering the pool.
+- Chapters sorted by the first number in the title (Kapitel 2 before Kapitel 10); titles without a number
+  last; ties by creation order (`byNumber` in `data.svelte.js`). Words in the order they were added.
 - Backup: JSON export/import. Merge by id (newer updatedAt wins) plus replace-all behind a confirm that auto-exports first.
 - Device is the source of truth and works offline. Optional cloud copy in a private GitHub gist
   (`src/lib/sync.svelte.js`): pull, merge by id (newer updatedAt wins), push if changed. Runs on open,
@@ -37,13 +40,15 @@ Done: tokens, data layer, chapters, chapter detail, add/edit form, single-card v
 study mode (swipe, buttons fallback, "learning only", shuffle, retries, direction), gender colours,
 settings with backup/restore, GitHub gist sync, GitHub Pages deploy (`.github/workflows/deploy.yml`, every push to main),
 search (Fuse.js over `fold()`ed fields in `data.svelte.js`; transposed letters in short words don't match).
-Next: PWA layer.
+Next: smarter learning algorithm (spaced repetition or similar); user is researching options first.
+Then: PWA layer (offline service worker, manifest, icons).
 
 ## Resolved: page-change flicker (iOS Safari)
 - Fixed itself on the GitHub Pages deploy (2026-10-18); never reproduced there. Most likely Safari was
   serving stale cached builds from the LAN dev/preview server (now `Cache-Control: no-store`).
 - Leftover debug tools, removable: `?nav=none|slide` and `?grain=0` switches, `public/flicker-test.html`.
-- The installed home-screen app is shelved for now because of iOS 26 bugs (bottom gap, top edge blur).
+- Home-screen app (Add to Home Screen) works as of 2026-10-20: the earlier iOS 26 bugs (bottom gap,
+  top edge blur) are gone.
 
 ## iOS notes
 - Swipe uses touch events with a non-passive touchmove (pointer events get cancelled by Safari's pan).

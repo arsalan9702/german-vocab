@@ -11,6 +11,15 @@ let ready = $state(false)
 
 const EMPTY = Object.freeze([])
 
+// Chapters sort by the first number in their title ("Kapitel 2" before "Kapitel 10").
+// Titles without a number come after, and ties keep creation order.
+const chapterNumber = (title) => {
+  const m = /\d+/.exec(title)
+  return m ? Number(m[0]) : Infinity
+}
+const byNumber = (a, b) =>
+  chapterNumber(a.title) - chapterNumber(b.title) || a.createdAt - b.createdAt
+
 const chapterMap = $derived(new Map(chapters.map((c) => [c.id, c])))
 const wordMap = $derived(new Map(words.map((w) => [w.id, w])))
 
@@ -85,7 +94,7 @@ liveQuery(async () => {
 }).subscribe({
   next({ c, w }) {
     fontsReady.then(() => {
-      chapters = c
+      chapters = c.sort(byNumber)
       words = w
       ready = true
     })

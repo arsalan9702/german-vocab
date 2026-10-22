@@ -30,14 +30,22 @@
     } catch {}
   }
 
+  const SIZES = [10, 20, 30]
+  const poolOf = (m) =>
+    m === 'learning' ? words.value.filter((w) => w.status !== STATUS.KNOWN) : words.value
+
   // The deck is a snapshot: marking a card known never reshuffles the session.
-  const build = (m) =>
-    buildDeck(m === 'learning' ? words.value.filter((w) => w.status !== STATUS.KNOWN) : words.value)
+  // A session is at most n different words, picked at random from the pool.
+  const build = (m, n) => buildDeck(poolOf(m)).slice(0, n)
 
   let mode = $state(saved(MODE_KEY, ['all', 'learning'], 'all'))
   let dir = $state(saved(DIR_KEY, ['de', 'en', 'mixed'], 'de'))
-  let deck = $state.raw(build(mode))
+  let size = $state(null) // null: asking how many words
+  let deck = $state.raw([])
   let index = $state(0)
+  const pool = $derived(mode === 'learning' ? learningCount : total)
+  // A size is offered if the pool fills it, or if it is the first size that covers the whole pool.
+  const offered = (n, i) => pool >= n || (i === 0 ? pool > 0 : pool > SIZES[i - 1])
   // Only the first answer of a session sets the status; retries are practice.
   let answered = new Set()
   let result = $state({ known: 0, learning: 0, retries: 0 })
@@ -46,10 +54,14 @@
   const done = $derived(index >= deck.length)
   const side = $derived(card ? (dir === 'mixed' ? card.mix : dir) : 'de')
 
-  function start(m) {
+  function setMode(m) {
     mode = m
     save(MODE_KEY, m)
-    deck = build(m)
+  }
+
+  function start(n) {
+    size = n
+    deck = build(mode, n)
     index = 0
     answered = new Set()
     result = { known: 0, learning: 0, retries: 0 }
@@ -211,7 +223,7 @@
   }
 
   function onkey(e) {
-    if (done || e.target.closest?.('input, textarea, select')) return
+    if (size === null || done || e.target.closest?.('input, textarea, select')) return
     if (e.key === 'ArrowRight') decide(STATUS.KNOWN)
     else if (e.key === 'ArrowLeft') decide(STATUS.LEARNING)
   }
@@ -236,26 +248,40 @@
         <a class="btn cyan" href={'#/add?chapter=' + id}>Add word</a>
       </section>
     {:else}
-      <div class="chips" role="group" aria-label="Which words">
-        <button class="chip" aria-pressed={mode === 'all'} onclick={() => start('all')}>
-          All {total}
-        </button>
-        <button class="chip" aria-pressed={mode === 'learning'} onclick={() => start('learning')}>
-          Learning only {learningCount}
-        </button>
-      </div>
-      <div class="chips" role="group" aria-label="Which side first">
-        {#each [['de', 'German first'], ['en', 'English first'], ['mixed', 'Mixed']] as [d, label] (d)}
-          <button class="chip" aria-pressed={dir === d} onclick={() => setDir(d)}>{label}</button>
-        {/each}
-      </div>
+      {#if size === null}
+        <div class="chips" role="group" aria-label="Which words">
+          <button class="chip" aria-pressed={mode === 'all'} onclick={() => setMode('all')}>
+            All {total}
+          </button>
+          <button class="chip" aria-pressed={mode === 'learning'} onclick={() => setMode('learning')}>
+            Learning only {learningCount}
+          </button>
+        </div>
+        <div class="chips" role="group" aria-label="Which side first">
+          {#each [['de', 'German first'], ['en', 'English first'], ['mixed', 'Mixed']] as [d, label] (d)}
+            <button class="chip" aria-pressed={dir === d} onclick={() => setDir(d)}>{label}</button>
+          {/each}
+        </div>
 
-      {#if deck.length === 0}
-        <section class="empty">
-          <Smiley size={96} />
-          <p class="t-serif">You know every word here</p>
-          <button class="btn cyan" onclick={() => start('all')}>Study all words</button>
-        </section>
+        {#if pool === 0}
+          <section class="empty">
+            <Smiley size={96} />
+            <p class="t-serif">You know every word here</p>
+            <button class="btn cyan" onclick={() => setMode('all')}>Study all words</button>
+          </section>
+        {:else}
+          <section class="card accent-yellow panel size-pick">
+            <h2 class="panel-title">How many words?</h2>
+            <div class="size-options">
+              {#each SIZES as n, i (n)}
+                <button class="btn white size-btn" disabled={!offered(n, i)} onclick={() => start(n)}>
+                  <span class="size-n">{n}</span>
+                  {#if n >= pool && offered(n, i)}<span class="size-note">all {pool}</span>{/if}
+                </button>
+              {/each}
+            </div>
+          </section>
+        {/if}
       {:else if done}
         <section class="empty">
           <Smiley size={110} />
@@ -265,10 +291,7 @@
             {result.retries === 1 ? 'retry' : 'retries'}
           </p>
           <div class="row study-actions">
-            <button class="btn cyan" onclick={() => start(mode)}>Study again</button>
-            {#if mode === 'all' && learningCount > 0}
-              <button class="btn" onclick={() => start('learning')}>Learning only</button>
-            {/if}
+            <button class="btn cyan" onclick={() => (size = null)}>Study again</button>
           </div>
           <a class="btn white" href={'#/chapter/' + id}>Back to chapter</a>
         </section>
